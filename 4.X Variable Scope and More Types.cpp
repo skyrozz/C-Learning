@@ -1140,6 +1140,167 @@ int doSomething(int x, int y){
 
 	4.4 - Implicit type conversion (coercion)
 
+	So since the value of a variable is stored as a sequence of bits, and the data type tells the compiler how to interpret those bits into meaningful values.
+	Different data types may represent the "same" number differently. for example, the integer value 3 and the float value 3.0 are stored as completely different
+	binary patterns.
+
+	So when we do something like this:
+
+	float f = 3; // initializing floating point f with integer 3.
+
+	in this case, the compiler can't just assign the value straight away. it has to first convert the integer 3 to a floating point number and only after that
+	can the compiler assign it to our variable f.
+
+	This process of converting a value from one data type to another is called a type conversion. Type conversions can happen in many different cases:
+
+	- Assigning or initializing a variable with a value of a different data type:
+
+	double d { 3 }; / initializing double variable with integer value 3
+	d = 6; // assigning an integer value to our double variable.
+
+	- passing a value to a function where the function parameter is of a different data type:
+
+	void doSomething(long l){
+	}
+
+	doSomething(3); // pass an integer value 3 to a function expecting a long parameter.
+
+	- Returning a value from a function where the function return type is of a different data type:
+
+	float doSomething(){
+	return 3.0; // return double value 3.0 back to caller through float  return type.
+	}
+
+	- Using a binary operator with operands of different types:
+
+	double division = 4.0 / 3; // division wiht a double and an integer.
+
+	in all of these cases (and quite a few others) C++ will use type conversion to convert data from one type to another.
+
+	there are two basic types of data conversion: implicit type conversion, where the compiler automatically transforms one fundamental data type into another,
+	and explicit type conversions, where the developer uses a casting operator  to direct the conversion.
+
+	We'll go into implicit type conversion in this lesson and explicit in the next..
+
+	Implicit type conversion:
+
+	Implicit type conversion (also called automatic type conversion or coercion) is performed whenever one fundanmental data type is expected, but a different fundamental
+	data type is supplied, and the user does not explicitly tell the compiler how to perform this conversion (via a cast).
+
+	all of the above examples have used this method.
+
+	there are two basic types of implicit type conversion: promotions  and conversions.
+
+	Numeric promotion:
+
+	Whenever a value from one type is converted into a value of a larger similar data type, this is called a numeric promotion (or widening, though this term 
+	is usually reserved for integers). For example, an int can be widened into a long, or a float be promoted into a double:
+
+	long l { 64 }; // widen the integer 64 into a long
+	double d { 0.12f }; // promote the float 0.12 into a double.
+
+	while the term "numeric promotion" covers any type of promotion, there are two other terms with specific meanings in C++:
+		- integral promotion involves the conversion of integer types narrower than int (which includes bool, char, unsigned char, unsigned shortm signed short)
+		to an int (if possible) or an unsigned int (otherwise)
+		- Floating point promotion involves the conversion of a float to a double.
+
+	integral promotion and floating point promotion are used in specific cases to convert smaller data types to int/unsigned int or double,
+	because int and double are generally the most performant types to perform operations on.
+
+	It's important to know that promotions are always safe and no data loss will result. Under the hood,
+	promotions generally involve extending the binary representation of a number (e.g. for integers, adding leading 0s).
+
+	Numeric conversions:
+
+	When we convert a value from a larager type to a similar smaller type or between different types, this is called a numeric conversion. For example:
+
+	double d { 3 }; // convert integer 3 into a double (between different types).
+	short s { 2 }; // convert integer 2 to a short (from larger to smaller type).
+
+	Unlike promotions, which are always safe, conversions may or may not result in a loss of data.
+	Because of this, any code that does an implicit conversion will often cause the compiler to issue a warning (on the other hand
+	, if you do an explicit conversion using a cast, the compiler will assume you know what you’re doing and not issue a warning).
+	Under the hood, conversions typically require converting the underlying binary representation to a different format.
+
+	The rules for conversions are complicated and numerous, so we’ll just cover the common cases here.
+
+	In all cases, converting a value into a type that doesn’t have a large enough range to support the value will lead to unexpected results.
+	This should be avoided. For example:
+
+	int i { 30000 };
+	char c { i };
+
+	std::cout << static_cast<int>(c);
+
+	in this example, we've assigned a large integer to a char (that has range -128 to 127) Which causes it to overflow and provide an undefined result:
+
+	48
+
+	However, converting from a larger integral or floating point type to a smaller similar type will generally work so long as the value fits in the range
+	of the samller type, for example:
+
+	int i { 2 };
+	short s { i }; // convert from int to short.
+
+	std::cout << s;
+
+	double d { 0.1234};
+	float f { d };
+	std::cout << f;
+
+	this produces the expected result:
+
+	2
+	0.1234
+
+	In the case of floating point values, some rounding errors are bound to happen when converting from a larger type to a smaller one.
+
+	converting from a floating point to an integer generally works as long as the value can fit into the integer, but any fractual values are lost
+
+	int i { 3.5 };
+	std::cout << i ;
+
+	Produces the value: 
+	
+	3
+
+	Evaluating arithmetic expressions:
+
+	when evaluating expressions, the compiler breaks each expression down into individual subexpressions.
+	the arithmetic operators require their operands to be of the same type. To ensure this, the compiler uses the following rules:
+
+	- if an operand is an integer that is narrower that an int, it undergoes integral promotion (as described above) to int or unsigned int.
+	- if the operands still do not match, the compiler finds the highes priority operand and implicitly converts the other operand to match.
+
+	The priority of operands is as follows:
+
+	- long double (highest)
+	- double
+	- float
+	- unsigned long long
+	- long long
+	- unsigned long
+	- long
+	- unsigned int
+	- int (lowest)
+
+	we can see the usual arithmetic conversion take place via use of the typeid() operator (included in the typeinfo header),
+	which can be used to show the resulting type of an expression.
+
+	This hierarchy can cause some rather interesting errors. For example, take a look at this code:
+
+	std::cout << 5u - 10; // 5u means treat 5 as unsigned integer
+
+	you might expect the expression 5u - 10 to evaluate to -5 since 5 - 10 = -5. but heres what actually happends:
+
+	4294967291
+
+	in this case, the signed integer (10) is promoted to an unsigned integer (which has higher priority), and the expression is evaluated as an unsigned int.
+	since -5 cant be stored in an unsigned int, overflow results and we get unexpected results.
+	this is one of many good reasons to avoid unsgned integers in general.
+
+	4.4a - explict type conversion (casting)
+
 
 
 
