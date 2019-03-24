@@ -1,4 +1,5 @@
 #include "pch.h"
+#include <string>
 #include <iostream>
 
 int main()
@@ -310,6 +311,8 @@ int main(){
 	std::cout << "Enter a larger integer: ";
 	int secondValue{ 0 };
 	std::cin >> secondValue;
+
+	std::cin.ignore(32767, '\n'); // you'll know what this means when you read down (:
 
 	//Flipping the values if second value is smaller than first.
 	if (firstValue > secondValue) {
@@ -1301,13 +1304,877 @@ int doSomething(int x, int y){
 
 	4.4a - explict type conversion (casting)
 
+	many new programmers try something like this: float f = 10 / 4;. however, because 10 and 4 are both integers, no promotion takes place. integer division
+	is performed on 10 / 4, resulting in the value  of 2, which is then implicitly converted to 2.0 and assigned to f!
+
+	in this case where you are using literal values ( 10 and 4) replacing one or  both of the integer literal value with a floating point literal value (10.0.
+	4.0) will cause both operands to be converted to floating point values, and the division will be done using floating point math.
+
+	but what if you're using variables? consider this case:
+
+	int i1 = 10;
+	int i2 = 4;
+	float f = i1 / i2;
+
+	variable f will end up with value of 2. to tell the compiler we want to use floating point division instead, we use a type casting operator (commonly known
+	as a cast) to tell the compiler to do explicit type conversion. A cast represents an explicit request by the programmer to do a type conversion.
+
+	Type casting:
+
+	in C++ there are 5 different types of casts: C-style casts, statics casts, const casts, dynamic casts, and reinterpret casts.
+
+	We'll cover C-style casts and static casts in this lesson. Dynamic casts we'll save until after we cover pointers and inheritance.
+
+	Const casts and reinterpret casts should generally be avoided because they are only useful in rare cases and can be harmful if used incorrectly.
+
+	Rule: Avoid const casts and reinterpret casts unless you have a very good reason to use them.
+
+
+	C-style casts:
+
+	in standard C programming, casts are done via the ()-operator, with the name of the type to cast inside. For example:
+	int i1 = 20;
+	itn i2 = 5;
+	float f = (float)i1 / i2;
+
+	in the above program we use float cast to tell the compiler to convert i1 to a floating point value. because i1 is a floating point value,
+	i2 will be converted to a floating point value as well.
+
+	C++ will also let you use a C-style cast with a more function-call like syntax:
+	int i1 = 10;
+	int i2 = 4;
+	float f = float(i1)  / i2;
+
+	Because C-style casts arent checked by the compiler at compile time, C-style  casts can be ingerently misused, because they will let you do things that
+	may not make sense, such as getting rid of a const or changing a data type without changing the underlying representation (leading to garbage result).
+
+	Consequently, C-style casts should generally be avoided
+
+	Rule: Avoid C-style casts.
+
+	static_cast:
+
+	C++ introduces a casting operator called static_cast. You've previously seen static_cast used to convert a char into an int so that std::cout
+	prints it as an integer instead of a char:
+
+	char c = 'a';
+	std::cout << static_cast<int>(c) << std::endl; //prints 97, not 'a'.
+
+	Static_cast is best used to convert one fundamental type into another:
+
+	int i1 = 10;
+	int i2 = 4;
+	float f = static_cast<float>(i1) / i2;
+	the main adventage of static_cast is that it provieds compile-time type checking, making it harder to make an inadvertent error. Static_cast is also
+	(intentionally) less powerful than C-style casts, so you can't inadvertently remove const or do other things you may not have intended to do.
+
+	Usings casts to make implicit type conversions clear:
+
+	Compilers will often complain when an unsafe implicit type conversion is performed. For example, consider the following program:
+
+	int i = 48;
+	char ch = i;
+
+	casting an int (4 bytes) to a char (1 byte) is potentilly unsafem and the compiler will typically complain. In order to announce to the compiler that you
+	are explicitly doing something you recognize is potentially unsafe (but want to do anyways) you can use a cast:
+
+	int i = 48;
+	char ch = static_cast<char>(i);
+
+	in the following program the compiler will typically complain that converting a double to an int may result in loss of data:
+	int i = 100;
+	i = i / 2.5;
+	
+	To tell the compiler that we explicitly mean to do this:
+
+	int i = 100;
+	i = static_cast<int>(i / 2.5);
+
+	Summary:
+
+	casting should be avoided if atr all possible, because any time a cast is useed, there is potential for trouble.
+	but there are emany times when it  can not be avoided. In most of these cases, the C++ static_cast should be used instead of the C-style cast.
 
 
 
 
+	in the following program, the compiler will typically complain that converting a double to an int may result in loss of data:
 
+	4.4b - An introcution to std::string:
 
+	What is a string?
+
+	The very first program we wrote:
+
+	#include <iostream>
+
+	int main(){
+		std::cout << "Hello World! << std::end;
+		return 0;
+	}
+
+	so what exactly is "Hello world!"? "Hello world!" is a collection of sequential characters called a string. In C++ we use strings to represent text such
+	names, addresses, words, and sentences. String literals (such as "Hello world!") are placed between double quotes to identify them as a string.
+
+	Because strings are commonly used in programs, most modern languages include a buil-in string data type. C++ includes one, not as part of the core language
+	but as part of the standard library.
+
+	std::string:
+
+	To use strings in C++ we first need to #include the <string> header to bring in the declarations for std::string. Once that is done, we can define 
+	variables of type std::string.
+
+	#include <string>
+
+	std::string myName;
+
+	just like normal variables, you can initialize or assign values to strings as you would expect:
+
+	std::string myName { "Juho" }; // initialize myName with string literal "Juho".
+	myName = "Sharon"; // Assign variable myName the string literal "Sharon".
+
+	Note that strings can hold numbers aswell:
+	std::string myID { "45" }; // "45" is not the same as integer 45!
+
+	In string form, numbers are treated as text, not numbers, and thus they cant be manipulated as numbers (e.g. you cant multiply them) C++ will not
+	automatically convert string numbers to integer or floating point values.
+
+	String input and output:
+
+	Strings can be output as expected using std::cout:
+
+	#include <string>
+	#include <iostream>
+
+	int main(){
+		std::string myName { "Juho" };
+		std::cout << "My name is: " << myName << "\n";
+
+		return 0;
+	}
+
+	This prints:
+
+	My name is: Juho
+
+	However, using strings with std::cin may yield some surprises! Consider the following example:
+
+	#include <string>
+	#include <iostream>
+
+	int main(){
+		std::cout << "Enter your full name: ";
+		std::string name;
+		std::cin >> name; // This wont work as expected since std::cin breaks on whitespace
+
+		std::cout << "Enter your age: ";
+		std::string age;
+		std::cin >> age;
+
+		std::cout << "Your name is " << name << " and your age is " << age << "\n";
+
+		return 0;
+
+	}
+
+	Here's the results from a sample run of this program:
+
+	Enter your full name: John Doe
+	Enter your age: Your name os John and your age is Doe
+
+	Hmmmm..... That isn't right :thinking: WTF!? It turns out when using operator>> to extract string from cin, operator>> only returns charactes up to the
+	first whitespace it encounters. Any other characters are left inside cin, waiting for the next extraction.
+
+	So when we used operator>> to extract string into variable name, only "John" was extrated leaving "Doe" inside std::cin, waiting for the next extraction. 
+	
+	Kakka.
+
+	When we then used operator>> to get variable age, it extracted "Doe" intstead of waiting for us to input an age. We are never given a chance to enter an age.
+
+	Use std::getline() to input text:
+
+	To read a full line of input into a string, you're better off using the std::getline() function instead. std::getline takes two parameters: the first is 
+	std::cin, and the second is your string variable.
+
+	Heres the same program as above using std::getline:
+
+	#include <string>
+	#include <iostream>
+
+	int main(){
+		std::cout << "Enter your full name: ";
+		std::string name;
+		std::getline(std::cin, name); // Read a full line of text into name
+
+		std::cout << "Enter your age: ";
+		std::string age;
+		std::getline(std::cin, age); // read full line of text into age
+
+		std::cout << "Your name is " << name << " and your age is " << age << "\n";
+
+		return 0;
+
+	}
+
+	Now the program works:
+
+	Enter your full name: John Doe
+	Enter your age: 23
+	Your name is John Doe and your age is 23
+
+	mixing std::cin and std::getline():
+
+	Reading inputs with both std::cin and std::getline may cause some unexpected behaviour. Consider the following:
+
+	#include <string>
+	#include <iostream>
+
+	int main(){
+		std::cout << "Pick 1 or 2: ";
+		int choice { 0 };
+		std::cin << choice;
+
+		std::cout << "Now enter your name: ";
+		std::string name;
+		std::getline(std::cin, name);
+		
+		std::cout << "Hello, " << name << ", you picked " << choice << "\n";
+
+		return 0;
+
+	}
+
+	This program first asks you to enter 1 or 2, and waits for you to do so. all good so far. then it will ask you to enter your name. however,
+	it wont actually wait for you to do so! Instead, it prints the "Hello" line, and then exits. What the hell happened?
+
+	It turns out, when you enter a value using std::cin, cin not only captures the value, it also captures the newline. So when we enter 2, cin actually gets
+	the string "2\n". It then extracts the 2 to variable choice, leaving the newline stuck in the input stream. Then when std::getline() gies ti read the name
+	it sees "\n" is already in the stream,, and figures we must have entered an empty string! 
+
+	kakka
+
+	A good rule of thumb is that after reading a value with std::cin, remove the newline from the stream. This can be done using the following:
+
+	std::cin.ignore(32767, '\n'); // ignore up to 32767 characters until a \n is removed.
+
+	If we instert this line directly after reading variable choice, the extraneous newline will be removed from the stream, and the program will work as
+	expected:
+
+	int main(){
+		std::cout << "Pick 1 or 2: ";
+		int choice { 0 };
+		std::cin >> choice;
+
+		std::cin.ignore(32767, '\n');
+
+		std::cout << "Now enter your name: ";
+		std::string name;
+		std::getline(std::cin, name);
+
+		std::cout << "Hello, " << name << ", you picked " << choice << '\n';
+
+		return 0;
+
+	}
+
+	Rule: If reading values with std::cin, its a good idea to remove the extraneous newline using std::cin.ignore().
+
+	what's that 32767 magic number in this code?
+
+	that thells std::cin.ignore() how many characters to ignore up to. we picked that number because its the largest signed value guaranteed to fit in a
+	(2-byte) integer on all platforms.
+	
+	technically the correct way to ignore an unlimited amount of input is as follows:
+
+	#include <limits>
+
+	...
+
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+	// ignore unlimited characters until a \n is removed
+
+	but this requires remembering (or looking up) that horrendous line of code, as well as remembering what header to include. Most of the time you wont need 
+	to ignore more that a line or two of buffered input, so for practical purposes, 32767 works about as well, and has the benefit of being something you can
+	actually remember in your head.
+
+	throughout these tutorials we use 32767 for this reason. However its your choice weheter you want to do it the "obscure, complex, and correct" way or the
+	"easy, practical, but not ideal" way.
+
+	Appending strings:
+
+	You can use operator+ to concatenate two strings together, or operator+= to append one sting to append one string to another. 
+
+	Here's an example of both, also showing what happens if you try to use operator+ to add two numeric strings together:
+
+	#include <string>
+	#include <iostream>
+
+	int main(){
+		std::string a { "45" };
+		std::string b { "11" };
+
+		std::cout << a + b << "\n"; // a and b will be appended, not added
+
+		a+= " volts";
+		std::cout << 2;
+
+		return 0;
+
+	}
+
+	This prints:
+
+	4511
+	45 volts
+
+	Note that operator+ concatenated the strings "45" and "11" into "4511". It did not add them as numbers.
+
+	String length:
+
+	If we want to know how long a string is, we can ask the string for its length. the syntax for doing this is different than you've seen beforem but its
+	pretty straightforward:
+
+	#include <string>
+	#include <iostream>
+
+	int main(){
+		std::string myName { "Juho" };
+		std::cout << myName << " has " << myName.length() << " characters \n";
+
+		return 0;
+
+	}
+
+	This prints:
+
+	Juho has 4 characters
+
+	Note that instead of asking for the string length as length(myName), we say myName.length().
+
+	The length function isn't a normal standalone function like we've used up to this point -- its a special type of function that belongs to std::string called
+	a member function. We'll cover member functions, including how to write your own, in more detail later.
+
+	Conclusion:
+
+	std::string is complex, leveraging many language features that we haven't covered yet. It also has a lot of other capabilities that we haven't touched
+	on here. Fortunately, you dont need to understand these complexities to use std::string for simple tasks, like basic string input and output. We encourage
+	to experiment with strings now, and we'll cover additional string capabilities later.
+
+	Quiz:
+
+	1)Write a program that asks the user to enter their full name and their age. As output, tell the user how many years they've lived
+	for each letter in their name (for simplicity count spaces as a letter).
+
+	Sample output:
+
+	Enter your full name: John Doe
+	Enter your age: 46
+	You've lived 5.75 years for each letter in your name.
 	*/
+
+	// 1)
+	std::cout << "Enter your full name: ";
+	std::string name;
+	std::getline(std::cin, name);
+
+	std::cout << "enter your age: ";
+	double age;
+	std::cin >> age;
+
+	std::cin.ignore(32767, '\n');
+	
+	std::cout << "You've lived " << age / name.length() << " years for each letter in your name. \n";
+
+	/* 4.5 - Enumerated types:
+
+	C++ contains quite a few built in data types. But these types arent always sufficient for the kinds of things we want to do. so C++ contains capabilities
+	that allow programmers to create their own data types. These data types are called user-defined data types.
+
+	Perhaps the simplest user-defined data type is the enumerated type. an enumerated type (also called an enumeration) is a data type where every possible
+	value is defined as a symbolic constant(called enumerator). Enumerations are defined via the enum keyword. Let's take a look at an example:
+
+	// define a new enumeration named Color.
+	enum Color{
+		// here are the enumerators
+		// These define all the possible values this type can hold
+		// each enumerator is seperatyed by a comma not a semicolon
+		COLOR_BLACK,
+		COLOR_RED,
+		COLOR_BLUE,
+		COLOR_GREEN,
+		COLOR_WHITE,
+		COLOR_CYAN,
+		COLOR_YELLOW,
+		COLOR_MAGENTA, // see note about trailing comma on the last enumator below
+	}; //However the enum itself must end with a semicolon 
+
+	// define a few variables of enumerated type color
+	Color paint = COLOR_WHITE;
+	Color house = (COLOR_BLUE);
+	Color apple { COLOR_RED };
+
+	Defining an enumeration (or any user-defined data type) does not allocate any memory. When a variable of the enumerated type is defined (such as
+	variable paint in the example above), memory is allocated for that variable at that time.
+
+	Note that each enumerator is separated by a comma, and the entire enumeration is ended with a semicolon.
+
+	Prior to C++11 a trailing comma after the last enumerator (e.g. after COLOR_MAGENTA) is not allowed (though many compilers accepted it anyway).
+	However, starting with C++11, a trailing comma is allowed. Now that C++11 compilers are more prevalent, use of a trailing comma after the last 
+	element is generally considered acceptable.
+
+	Naming enums:
+
+	Enum identifiers are often named starting with a capital letter, and the enumerators are often named using all caps. because enumerators are placed 
+	into the same namespace as the enumeration, an enumerator name can't be used in multiple enumerations within the same namespace:
+
+	enum Color{
+		RED,
+		BLUE, // BLUE is put into the global namespace
+		GREEN
+	};
+
+	enum Feeling{
+		HAPPY,
+		TIRED,
+		BLUE // error, BLUE was already used in enum Color in the global namespace
+	};
+
+	Consequently, it’s common to prefix enumerators with a standard prefix like ANIMAL_ or COLOR_, both to prevent naming conflicts
+	and for code documentation purposes.
+
+	Enumerator values:
+
+	Each enumerator is automatically assigned an integer value based on its position in the enumeration list. By default,
+	the first enumerator is assigned the integer value 0, and each subsequent enumerator has a value one greater than the previous enumerator:
+
+	enum Color{
+		COLOR_BLACK, // assigned 0
+		COLOR_RED, // assigned 1
+		COLOR_BLUE, // assigned 2
+		COLOR_GREEN, // assigned 3
+		COLOR_WHITE, // assigned 4
+		COLOR_CYAN, // assigned 5
+		COLOR_YELLOW, // assigned 6
+		COLOR_MAGENTA // assigned 7
+	};
+
+	Color paint(COLOR_WHITE);
+	std::cout << paint;
+
+	The cout statement prints the value 4.
+
+	It is possible to explicitly define the value of enumerator. these integer  values can be positive or negative and can share the same value as other
+	enumerators. Any non-defined enumerators are given a value on greater than the previous enumerator.
+
+	// define a new enum named Animal
+
+	enum Animal{
+		ANIMAL_CAT = -3,
+		ANIMAL_DOG, // assigned -2
+		ANIMAL_PIG, // assigned -1
+		ANIMAL_HORSE = 5,
+		ANIMAL_GIRAFFE = 5, // shares same value as ANIMAL_HORSE
+		ANIMAL_CHICKEN // assigned 6
+	};
+
+	Note in this case, ANIMAL_HORSE and ANIMAL_GIRAFFE have been given the same value. When this happens, the enumerations become non-distinct
+	-- essentially, ANIMAL_HORSE and ANIMAL_GIRAFFE are interchangeable. Although C++ allows it, assigning the same value to two enumerators
+	in the same enumeration should generally be avoided.
+
+	Best practice: Don’t assign specific values to your enumerators.
+	Rule: Don’t assign the same value to two enumerators in the same enumeration unless there’s a very good reason.
+
+	Enum type evaluation and input/output
+
+	Because enumerated values evaluate to integers, they can be assigned to integer variables. This means they cacn also be output (as integers), since 
+	std::cout knows how to output integers.
+
+	int mypet = ANIMAL_PIG
+	std::cout << ANIMAL_HORSE; // evaluates to integer before being passed to std::cout
+
+	This produces the result:
+
+	5
+
+	The compiler will not implicitly convert an integer to an enumerated value. The following will produce a compiler error:
+
+	Animal animal = 5; // will cause compiler error
+
+	However you can force it to do so via a static cast:
+
+	Color color = static.cast<Color>(5);
+
+	The compiler also will not let you input an enum using std::cin:
+
+	enum Color{
+		COLOR_BLACK, // assigned 0
+		COLOR_RED, // assigned 1
+		COLOR_BLUE, // assigned 2
+		COLOR_GREEN, // assigned 3
+		COLOR_WHITE, // assigned 4
+		COLOR_CYAN, // assigned 5
+		COLOR_YELLOW, // assigned 6
+		COLOR_MAGENTA // assigned 7
+	};
+
+	Color color;
+	std::cin >> color; // will cause compiler error
+
+	One workaround is to read in an integer, and use static cast to force the compiler to put an integer value into an enumerated type:
+
+	int inputColor;
+	std::cin >> inputColor;
+
+	Color color = static.cast<Color>(inputColor);
+
+	 Each enumerated type is considered a distinct type. Consequently, trying to assign enumerators from one enum type to another enum type 
+	 will cause a compile error:
+
+	 Animal animal = COLOR_BLUE; // Will cuase compiler error
+
+	 As with constant variables, enumerated types show up in the debugger, making them more useful that #defined values in this regard.
+
+	 Printing enumerators:
+
+	 As you saw above, trying to print an enumerated value using std::cout results in the integer value of the enumerator being printed. So how can you print
+	 the enumerator itself as text? One way to do so is to write a function and use an if statement:
+
+	enum Color{
+		COLOR_BLACK, // assigned 0
+		COLOR_RED, // assigned 1
+		COLOR_BLUE, // assigned 2
+		COLOR_GREEN, // assigned 3
+		COLOR_WHITE, // assigned 4
+		COLOR_CYAN, // assigned 5
+		COLOR_YELLOW, // assigned 6
+		COLOR_MAGENTA // assigned 7
+	};
+
+	void printColor(Color color){
+		if (color == COLOR_BLACK)
+			std::cout << "Black";
+		else if (color == COLOR_RED)
+			std::cout << "Red";
+		else if (color == COLOR_BLUE)
+			std::cout << "Blue";
+		else if (color == COLOR_GREEN)
+			std::cout << "Green";
+		else if (color == COLOR_WHITE)
+			std::cout << "White";
+		else if (color == COLOR_CYAN)
+			std::cout << "Cyan";
+		else if (color == COLOR_YELLOW)
+			std::cout << "Yellow";
+		else if (color == COLOR_MAGENTA)
+			std::cout << "Magenta";
+		else
+			std::cout << "Who knows!";
+	}
+
+	Once you've learned to use switch statements you'll probably want to use thse instead of a bunc of if/else statements, as it's a little more readable.
+
+	Enum allocation and forward declaration:
+
+	Enum types are considered a part of the integer family of types, and its up to the compiler to determine how much memory to allocate for an enum variable.
+	The C++ standard says the enum size needs to be large enough to represent all of the enumerator values. most often it will make enum variables the same
+	size as a standard int.
+
+	Because the compiler needs to know how much memory to allocate for an enumeration, you cannot forward declare enum types. However, there is an easy
+	workaround. Because defining an enumeration does not allocate any memory, if an enumeration is needed in multiple files, it is fine to define the 
+	enumeration in a header, and #include that header wherever needed.
+
+	What are enumerators useful for?
+
+	Enumerated types are incredibly useful for code documentation and readability purposes when you need to represent a specific, predefined set of states.
+
+	For example, functions often return integers to the caller to represent error codes when something went wrong inside the function. Typically, small
+	negative numbers are used to represent different possible error codes. For example:
+
+	int readFileContents(){
+		if (!openFile())
+			return -1;
+		if (!readFile())
+			return -2;
+		if (!parseFile())
+			return -3;
+
+		return 0; // success!
+
+	}
+
+	However, using magic numbers like this isn't very descriptive. An alternative method would be through use of an enumerated type:
+
+	enum ParseResult{
+		SUCCESS = 0,
+		ERROR_OPENING_FILE = -1,
+		ERROR_READING_FILE = -2,
+		ERROR_PARSING_FILE = -3
+	};
+
+	ParseResult readFileContents(){
+		if (!openFile())
+			return ERROR_OPENING_FILE;
+		if (!readFile())
+			return ERROR_READING_FILE;
+		if (!parsefile())
+			return ERROR_PARSING_FILE;
+
+		return SUCCESS;
+	}
+
+	This is much  easier to read and understand than using magic number return values. Furthermorem the caller can test the functions return value
+	against the appropriate enumerator, which is easier to understand  that testing the retrn result for a specific integer value.
+
+	if (readFileContents() == SUCCESS){
+		// do something
+	}
+	else{
+		// print error message
+	}
+
+	Enumerated types are best used when defining a set of related identifiers. For example, let's say you were writing a game where the player can carry
+	one item, but that item can be several different types. you could do this:
+
+	#include <iostream>
+	#include <string>
+
+	enum ItemType{
+		ITEMTYPE_SWORD,
+		ITEMTYPE_TORCH,
+		ITEMTYPE_POTION
+	};
+
+	std::string getItemName(ItemType itemType){
+		if (itemType == ITEMTYPE_SWORD)
+			return std::string("Sword");
+		if (itemType == ITEMTYPE_TORCH)
+			return std::string("Torch");
+		if (itemType == ITEMTYPE_POTION)
+			return std::string("Potion");
+
+	// Just in case we add a new item in the future and forget to update this function
+	return std::string("???");
+	}
+
+	int main(){
+		// ItemType is the enumerated type we've defined above.
+		// itemType (lower case i) is the name of the variable we're defining (of type ItemType).
+		// ITEMTYPE_TORCH is the enumerated value we're initializing variable itemType with.
+		ItemType itemType = ITEMTYPE_TORCH;
+
+		std::cout << "You are carrying a " << getItemName(itemType) << "\n";
+
+		return 0;
+	}
+
+	Or alternatively, if you were writing a function to sort a bunch of values:
+
+	enum SortType{
+		SORTTYPE_FORWARD,
+		SORTTYPE_BACKWARDS
+	};
+
+	void sortData(SortType type){
+		if (type == SORTTYPE_FORWARD)
+			// sort data in forward order
+		else if (type == SORTTYPE_BACKWARDS)
+			// sort data in backwards order
+	}
+
+	Many languages use Enumerations to define booleans. A boolean is essentially just an enumeration with 2 enumerators: false and true! However, in C++
+	true and false are defined as keywords instead of enumerators.
+
+	Quiz:
+
+	1) Define an enumerated type to choose between the following monster races: orcs, goblins, trolls, ogres, and skeletons.
+
+	enum MonsterType(){
+		MONSTERTYPE_ORCS,
+		MONSTERTYPE_GOBLINS,
+		MONSTERTYPE_TROLLS,
+		MONSTERTYPE_OGRES,
+		MONSTERTYPE_SKELETONS
+	};
+
+	int main(){
+
+		MonsterType monster = MONSTERTYPE_TROLLS;
+
+
+	4.5a - Enum classes
+
+	Although enumerated types are distinct types in C++, they are not type safe, and in some caes will allow you to do things that dont make sense.
+	Consider the following case:
+
+	#include <iostream>
+
+	int main (){
+		enum Color{
+			RED, // RED is placed in the same scope as Color
+			BLUE
+		};
+
+		enum Fruit{
+			BANANA, // BANANA is placed in the same scope as Fruit
+			APPLE
+		};
+
+		Color color = RED; // Color and RED can be accessed in the same scope (no prefix needed)
+		Fruit fruit = BANANA; // Fruit and BANANA can be accessed in the same scope (no prefix needed)
+
+		if (color == fruit) // the compiler will compare a and b as integers
+			std::cout << "color and fruit are equal\n"; // and find they are equal
+		else
+			std::cout << "color and fruit are not equal \n";
+		return 0;
+	}
+
+	When C++ compares color and fruit, it implicitly converts color and fruit to integers, and compares the integers. Since color and fruit have both been
+	set to enumators that evaluate to value 0, this means that in the above example, color will equal to fruit. this definitely not as desired since color
+	and fruit are from different enumerations and are not intended to be comparable! With standard enumerators, there is no way to prevent comparing 
+	enumerators from different enumerations
+
+	C++11 defines a new concept, the enum class (also called a scpoped enumeration), which makes enumerations both strongly typed and strongly scoped. 
+	To make an enum class, we use the keyword calss after the enum keyword. heres an example:
+
+	#include <iostream>
+
+	int main (){
+		enum class Color{ // "enum class" defines this as a scoped enumeration instead of a standard enumeration
+			RED, // RED is inside the scope of Color
+			BLUE
+		};
+
+		enum calss Fruit{
+			BANANA, // BANANA is inside the scope of Fruit
+			APPLE
+		};
+
+		Color color == Color::RED; // note: RED is not directly accessible any more, we have to use Color::RED
+		Fruit fruit == Fruit::BANANA // Note: BANANA is not directly accessible any more, we have to use Fruit::BANANA
+
+		if (color == fruit) // Compile error here, as the compiler doesnt know how to compare different types Color and Fruit
+			std::cout << "color and fruit are equal \n";
+		else
+			std::cout << "color and fruit are not equal \n";
+
+		return 0;
+
+	}
+
+	With normal enumerations, enumerators are placed in the same  scope as the enumeration itself, so you can typically access enumerators directly (e.g.
+	RED). However with enum calsses, the strong scoping rules mean that all enumerators are cosnidered part of the enumeration, so you have to use a scope 
+	qualifier to access the enumerator (e.g. Color::RED). This helps keep name pollution and the potential for name conficts down.
+
+	Because the enumerators are part of the enum class, there's no need to prefix the enumerator names (e.g. its okay to use RED instead of COLOR_RED, since
+	Color::COLOR_RED is redundant).
+
+	The strong typing rules means that each enum class is considered a unique type. this means that the compiler will not implicitly compare enumerators
+	from different enumerations. if you try to do som the compiler will throw an error, as shown in the example above.
+
+	However, nhote that you can still compare enumerators from within the same enum class (since they are of the same type):
+
+	#include <iostream>
+
+	int main (){
+		enum class Color{
+			RED,
+			BLUE
+		};
+
+		Color color = Color::RED
+
+		if (color = Color::RED) // this is ok
+			std::cout << "The color is red! \n";
+		else if (color = Color::BLUE)
+			std::cout << "The color is blue! \n";
+
+		return 0;
+
+	}
+
+	With enum classes, the compiler will no longer implicitly convert enumerator values to integers. this is mostly a good thing. however there are 
+	occasionally cases where it is useful to be aboke to do so. in these cases you can explicitly convert an enum class enumerator to an integer by using
+	a static_cast t int:
+
+	#include <iostream>
+
+	int main(){
+		enum class Color{
+			RED,
+			BLUE
+		};
+
+		Color color = Color::BLUE;
+
+		std::cout << color; // wont work, because there's no implicit conversion to int
+		std::cout << static_cast<int>(color); // will print 1
+		
+		return 0;
+
+	}
+
+	If you're using a C++11 compiler, there's little reason to use normal enumerated types instead of enum classes.
+
+	Note that the class keyword along wiht the static keyword is one of the most overloaded keywords in the C++ language, and can have different meanings
+	depending on context. Although enum classes use the class keyword, they aren't considered "classes" in the traditional C++ sense. We'll civer actual
+	classes later.
+
+	Also, just in case you ever run into it, "enum struct" is equivalent to "enum class". But this usage is not recommended and is not commonly used.
+	
+
+	4.6 - typedefs and type aliases
+
+	Typedefs allow tje programmer to create an alias for a data type, and use the aliased name instead of the actual type name. To declare a typedef
+	simply use the typedef keyword, followed by the type to alias, followed by the alias name:
+
+	typedef double distnace_t; // define distance_t as an alias for type double
+
+	// The following two statements are equivalent:
+	double d HowFar;
+	distance_t HowFar;
+
+	By convention typedef names are declared using a "_t" suffix. this helps indicate that they are types and not variables. this also helps to prevent
+	naming collision.
+
+	Typedef doesnt define a new type, its just an alias for an existing type. A typedef can be used interchangeably anywhere a regular type can.
+
+	Typedefs are useful in a number of situations.
+
+	Using typedefs for legibility
+
+	one use for typedefs is to help with documentation and legibility. Data type names such as char, int, long, double, and bool are good for describing
+	what type a function returns, but  more often we want to know what purpose a return value serves.
+
+	For example, consider the following function.
+
+	int GradesTest();
+
+	We can see that the return value is an iteger, but what does the integer mean? A letter grade? The number of questions missed? The students ID number?
+	An error code? who knows! Int does not tell us anything.
+
+	typedef int testScore_t;
+	testScore_t GradeTest();
+
+	However, using a return type of testScore_t makes it obvious that the function is returing a type that represents a test score.
+
+	Using typedefs for easier code maintenance:
+
+
+
+
+
+
+
+
+
+
+	
+	*/
+
+
+
+
 
 	
 	const char *lause = { "Juho on kakka." };
